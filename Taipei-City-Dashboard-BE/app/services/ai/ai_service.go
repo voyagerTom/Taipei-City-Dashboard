@@ -79,7 +79,7 @@ type aiSession struct {
 }
 
 func (s *aiSession) run(ctx context.Context) (*models.AIChatLog, error) {
-	maxLoops := 5
+	maxLoops := 3
 	s.executedTools = make([]string, 0)
 	for i := 0; i < maxLoops; i++ {
 		s.sendHeartbeat(ctx)
@@ -99,6 +99,21 @@ func (s *aiSession) run(ctx context.Context) (*models.AIChatLog, error) {
 			break
 		}
 	}
+
+	// If the last response was a tool call (no text content), force a final generation without tools
+	if s.lastResp != nil && len(s.lastResp.Choices) > 0 && s.lastResp.Choices[0].Content == "" && s.toolUsed {
+		logs.FInfo("Forcing final generation without tools to get text response")
+		s.currentMessages = append(s.currentMessages, llms.MessageContent{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextContent{Text: "請根據以上收集到的數據，直接用 JSON 格式回答。"}},
+		})
+		// Override tools to empty so LLM must respond with text
+		savedOpts := s.options
+		s.options = append(s.options, llms.WithTools(nil))
+		s.generate(ctx)
+		s.options = savedOpts
+	}
+
 	return s.finalize()
 }
 
