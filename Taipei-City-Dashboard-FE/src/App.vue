@@ -33,6 +33,7 @@ import ComponentSideBar from "./components/utilities/bars/ComponentSideBar.vue";
 import LogIn from "./components/dialogs/LogIn.vue";
 import ChatBox from "./components/dialogs/ChatBox.vue";
 import ChatBotIcon from "./components/icons/ChatBotIcon.vue";
+import CatAssistant from "./components/cat/CatAssistant.vue";
 
 const authStore = useAuthStore();
 const dialogStore = useDialogStore();
@@ -276,19 +277,28 @@ onBeforeUnmount(() => {
         v-if="isChatBoxShow"
         class="chatbox"
       />
-      <div
-        v-if="isChatBtnShow"
-        class="chatbot-btn-area"
-      >
-        <div class="hide-chat-btn">
-          <button @click="hideBtnClickHandler" />
-        </div>
-        <button
-          class="chatbot-btn"
-          @click="chatbotBtnHandler"
+      <div class="chatbot-right-col">
+        <CatAssistant
+          v-if="
+            ['dashboard', 'mapview'].includes(authStore.currentPath) &&
+              !authStore.isMobile &&
+              !authStore.isNarrowDevice
+          "
+        />
+        <div
+          v-if="isChatBtnShow"
+          class="chatbot-btn-area"
         >
-          <ChatBotIcon />
-        </button>
+          <div class="hide-chat-btn">
+            <button @click="hideBtnClickHandler" />
+          </div>
+          <button
+            class="chatbot-btn"
+            @click="chatbotBtnHandler"
+          >
+            <ChatBotIcon />
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -338,17 +348,24 @@ onBeforeUnmount(() => {
 // Chatroom 樣式
 .chatbot-container {
 	position: fixed;
-	bottom: 1.5rem; // Tailwind bottom-6 → 24px
+	bottom: 1.5rem;
 	right: 1.5rem;
 	display: flex;
 	align-items: flex-end;
-	gap: 1rem; // Tailwind gap-4 → 16px
+	gap: 1rem;
 	z-index: 10;
 
 	.chatbox {
 		width: 400px;
 		height: 500px;
 		margin-bottom: 35px;
+	}
+
+	.chatbot-right-col {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 12px;
 	}
 
 	.chatbot-btn-area {
@@ -363,8 +380,8 @@ onBeforeUnmount(() => {
 		}
 		.hide-chat-btn button::before {
 			content: "–";
-			font-weight: bold; /* 變粗 */
-			font-size: 20px; /* 可以順便調整大小 */
+			font-weight: bold;
+			font-size: 20px;
 		}
 		.chatbot-btn {
 			width: 70px;
@@ -373,7 +390,7 @@ onBeforeUnmount(() => {
 			align-items: center;
 			justify-content: center;
 			border-radius: 50%;
-			background-color: #3b82f6; // Tailwind bg-blue-500
+			background-color: #3b82f6;
 			filter: brightness(1.5);
 			transition: filter 0.2s;
 

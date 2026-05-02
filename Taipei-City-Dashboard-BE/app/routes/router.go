@@ -201,6 +201,14 @@ func configureAIRoutes() {
 	aiRoutes := RouterGroup.Group("/ai")
 	aiRoutes.Use(middleware.LimitAPIRequests(global.ComponentLimitAPIRequestsTimes, global.LimitRequestsDuration))
 	aiRoutes.Use(middleware.LimitTotalRequests(global.ComponentLimitTotalRequestsTimes, global.LimitRequestsDuration))
+
+	// Public endpoints for cat assistant (no login required)
+	aiRoutes.GET("/summary/:dashboardIndex", controllers.GetDashboardSummary)
+	aiRoutes.POST("/chat/public", controllers.PublicChatWithTWCC)
+	aiRoutes.GET("/logs", controllers.GetAIChatLogs)
+	aiRoutes.GET("/logs/stats", controllers.GetAIChatLogStats)
+
+	// Authenticated endpoint
 	aiRoutes.Use(middleware.IsLoggedIn())
 	{
 		aiRoutes.POST("/chat/twai", controllers.ChatWithTWCC)

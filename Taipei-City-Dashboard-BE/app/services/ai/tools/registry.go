@@ -14,9 +14,9 @@ type ToolFunc func(ctx context.Context, args string) (string, error)
 var registry = make(map[string]ToolFunc)
 
 func init() {
-	// Register demo tools
 	Register("get_current_time", GetCurrentTime)
 	Register("get_population_summary", GetPopulationSummary)
+	Register("get_dashboard_data", GetDashboardData)
 }
 
 // Register adds a tool to the registry
@@ -92,7 +92,69 @@ func GetCurrentTime(ctx context.Context, args string) (string, error) {
 	return time.Now().In(loc).Format("2006-01-02 15:04:05"), nil
 }
 
-// Helper to parse JSON arguments if needed in future tools
+// GetDashboardData fetches chart data for a specific component by ID and city.
+func GetDashboardData(ctx context.Context, args string) (string, error) {
+	var params struct {
+		ComponentID int    `json:"component_id"`
+		City        string `json:"city"`
+	}
+	if err := parseArgs(args, &params); err != nil {
+		return "", fmt.Errorf("invalid arguments: %v", err)
+	}
+	if params.ComponentID == 0 {
+		return "", fmt.Errorf("component_id is required")
+	}
+	if params.City == "" {
+		params.City = "taipei"
+	}
+
+	queryType, queryString, err := models.GetComponentChartDataQuery(params.ComponentID, params.City)
+	if err != nil || queryString == "" {
+		return fmt.Sprintf("找不到組件 ID %d 的數據", params.ComponentID), nil
+	}
+
+	var result interface{}
+	switch queryType {
+	case "two_d":
+		data, err := models.GetTwoDimensionalData(&queryString, "", "")
+		if err != nil {
+			return fmt.Sprintf("查詢失敗: %v", err), nil
+		}
+		result = data
+	case "three_d", "percent":
+		data, categories, err := models.GetThreeDimensionalData(&queryString, "", "")
+		if err != nil {
+			return fmt.Sprintf("查詢失敗: %v", err), nil
+		}
+		result = map[string]interface{}{"categories": categories, "series": data}
+	case "time":
+		data, err := models.GetTimeSeriesData(&queryString, "", "")
+		if err != nil {
+			return fmt.Sprintf("查詢失敗: %v", err), nil
+		}
+		for i := range data {
+			if len(data[i].Data) > 10 {
+				data[i].Data = data[i].Data[len(data[i].Data)-10:]
+			}
+		}
+		result = data
+	case "map_legend":
+		data, err := models.GetMapLegendData(&queryString, "", "")
+		if err != nil {
+			return fmt.Sprintf("查詢失敗: %v", err), nil
+		}
+		result = data
+	default:
+		return fmt.Sprintf("不支援的查詢類型: %s", queryType), nil
+	}
+
+	jsonBytes, err := json.Marshal(result)
+	if err != nil {
+		return "資料序列化失敗", nil
+	}
+	return string(jsonBytes), nil
+}
+
 func parseArgs(args string, v interface{}) error {
 	return json.Unmarshal([]byte(args), v)
 }
