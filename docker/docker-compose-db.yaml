@@ -7,7 +7,7 @@ services:
     image: redis:7.2.3-alpine
     volumes:
       - redis-data:/data
-      
+
   postgres-data:
     image: postgis/postgis:16-3.4-alpine
     container_name: postgres-data
@@ -18,6 +18,32 @@ services:
       POSTGRES_PASSWORD: ${DB_DASHBOARD_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+
+      #放csv檔，啟動時會自動執行
+      - ./ogdata/garbage_truck.csv:/docker-entrypoint-initdb.d/garbage_truck.csv
+
+      #組件1&2_食安檢驗總覽/食安檢驗分佈
+      - ./ogdata/food_inspections.csv:/docker-entrypoint-initdb.d/food_inspections.csv
+      - ./ogdata/food_inspections_dist.csv:/docker-entrypoint-initdb.d/food_inspections_dist.csv
+
+      #組件3_登革熱疫情概況
+      - ./ogdata/dengue_invest.csv:/docker-entrypoint-initdb.d/dengue_invest.csv
+      - ./ogdata/dengue_daily_case.csv:/docker-entrypoint-initdb.d/dengue_daily_case.csv
+
+      #組件4_登革熱快篩資源分佈
+      - ./ogdata/hosp_vaccine_info.csv:/docker-entrypoint-initdb.d/hosp_vaccine_info.csv
+
+      #組件5_麻疹(漢他病毒)概況
+      - ./ogdata/measles_case.csv:/docker-entrypoint-initdb.d/measles_case.csv
+
+      #組件7_急救責任醫院分佈
+      - ./ogdata/emergency_hospital.csv:/docker-entrypoint-initdb.d/emergency_hospital.csv
+
+      #組件8_藥局分佈
+      - ./ogdata/parmacy.csv:/docker-entrypoint-initdb.d/parmacy.csv
+
+      #放table schema，啟動時會自動執行
+      - ./ogdata/myData.sql:/docker-entrypoint-initdb.d/init.sql
 
   postgres-manager:
     image: postgis/postgis:16-3.4-alpine
