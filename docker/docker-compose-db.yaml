@@ -40,7 +40,7 @@ services:
       - ./ogdata/emergency_hospital.csv:/docker-entrypoint-initdb.d/emergency_hospital.csv
 
       #組件8_藥局分佈
-      - ./ogdata/parmacy.csv:/docker-entrypoint-initdb.d/parmacy.csv
+      - ./ogdata/pharmacy.csv:/docker-entrypoint-initdb.d/pharmacy.csv
 
       #放table schema，啟動時會自動執行
       - ./ogdata/myData.sql:/docker-entrypoint-initdb.d/init.sql

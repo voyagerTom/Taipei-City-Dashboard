@@ -490,7 +490,7 @@ COPY public.:currentTBL(
 -- Name: 組件8_健保特約藥局
 --
 \echo 
-\set currentTBL 'parmacy'
+\set currentTBL 'pharmacy'
 -- 2. 稽查紀錄主表
 CREATE TABLE public.:currentTBL (
    -- 自動遞增的主鍵
@@ -519,7 +519,7 @@ COPY public.:currentTBL(
     longitude ,
     latitude 
 
-) FROM '/docker-entrypoint-initdb.d/parmacy.csv' DELIMITER ',' CSV HEADER;
+) FROM '/docker-entrypoint-initdb.d/pharmacy.csv' DELIMITER ',' CSV HEADER;
 
 
 \echo '組件8' :currentTBL 匯入資料完成
