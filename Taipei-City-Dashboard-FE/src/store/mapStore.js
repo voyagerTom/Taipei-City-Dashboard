@@ -320,6 +320,37 @@ export const useMapStore = defineStore("map", {
 					},
 				);
 			});
+
+			const dynamicIcons = [
+				{ name: "local_hospital", bg: "#E53935", symbol: "+" },
+				{ name: "emergency", bg: "#FF6F00", symbol: "+" },
+				{ name: "local_pharmacy", bg: "#43A047", symbol: "Rx" },
+				{ name: "vaccines", bg: "#1E88E5", symbol: "+" },
+			];
+			dynamicIcons.forEach(({ name, bg, symbol }) => {
+				const size = 40;
+				const canvas = document.createElement("canvas");
+				canvas.width = size;
+				canvas.height = size;
+				const ctx = canvas.getContext("2d");
+				ctx.beginPath();
+				ctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
+				ctx.fillStyle = bg;
+				ctx.fill();
+				ctx.strokeStyle = "#ffffff";
+				ctx.lineWidth = 2;
+				ctx.stroke();
+				ctx.fillStyle = "#ffffff";
+				ctx.font = `bold ${symbol.length > 1 ? 14 : 22}px sans-serif`;
+				ctx.textAlign = "center";
+				ctx.textBaseline = "middle";
+				ctx.fillText(symbol, size / 2, size / 2);
+				this.map.addImage(
+					name,
+					ctx.getImageData(0, 0, size, size),
+					{ pixelRatio: 2 },
+				);
+			});
 			// 預載 3D 模型給 3D Mrt Map
 			const models = [
 				{ id: "mrt_car_c381", url: "/images/map/mrt_car_c381.glb" },
@@ -458,7 +489,12 @@ export const useMapStore = defineStore("map", {
 				.then((rs) => {
 					this.addGeojsonSource(map_config, rs.data);
 				})
-				.catch((e) => console.error(e));
+				.catch((e) => {
+					console.error(e);
+					this.loadingLayers = this.loadingLayers.filter(
+						(el) => el !== map_config.layerId,
+					);
+				});
 		},
 		// 3-1. Add a local geojson as a source in mapbox
 		addGeojsonSource(map_config, data) {
