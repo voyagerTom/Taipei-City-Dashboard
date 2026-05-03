@@ -495,12 +495,15 @@ COPY public.:currentTBL(
 CREATE TABLE public.:currentTBL (
    -- 自動遞增的主鍵
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,        -- 機構名稱
-    address TEXT NOT NULL,             -- 地址
-    phone VARCHAR(20),                 -- 電話
-    longitude NUMERIC(10, 7),          -- x (經度)
-    latitude NUMERIC(10, 7),           -- y (緯度)
-    
+ 	county          VARCHAR(20)  NOT NULL,
+    name   VARCHAR(100) NOT NULL,
+    address         VARCHAR(200) NOT NULL,
+    phone             VARCHAR(30),
+    longitude       NUMERIC(10, 7),
+	latitude        NUMERIC(10, 7),
+
+
+
     -- 紀錄創建時間
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -512,7 +515,7 @@ CREATE TABLE public.:currentTBL (
 
 
 COPY public.:currentTBL(
-
+	county,
  name ,
     address ,
     phone ,
